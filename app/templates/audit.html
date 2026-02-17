@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Audit</h1>
+<form class="grid md:grid-cols-5 gap-2 mb-3">
+<input name="username" placeholder="user" class="border rounded p-2">
+<input name="action" placeholder="action" class="border rounded p-2">
+<input name="from_date" type="date" class="border rounded p-2">
+<input name="to_date" type="date" class="border rounded p-2">
+<button class="bg-blue-600 text-white rounded px-3">Filter</button>
+</form>
+<div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow overflow-auto"><table class="w-full text-sm"><tr><th>Time</th><th>User</th><th>Action</th><th>Details</th></tr>{% for r in rows %}<tr class="border-t"><td>{{r.ts}}</td><td>{{r.username}}</td><td>{{r.action}}</td><td>{{r.details}}</td></tr>{% endfor %}</table></div>
+{% endblock %}

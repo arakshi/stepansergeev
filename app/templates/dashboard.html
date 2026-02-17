@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Dashboard</h1>
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+  <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow"><div class="text-xs">Online / Total</div><div class="text-2xl font-bold">{{kpi.online_agents}} / {{kpi.total_agents}}</div></div>
+  <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow"><div class="text-xs">Deployments 24h</div><div class="text-2xl font-bold">{{kpi.deployments_24h}}</div></div>
+  <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow"><div class="text-xs">Error rate /1000</div><div class="text-2xl font-bold">{{kpi.error_rate_per_1000}}</div></div>
+  <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow"><div class="text-xs">Avg latency</div><div class="text-2xl font-bold">{{kpi.avg_latency}} ms</div></div>
+</div>
+<div class="grid lg:grid-cols-2 gap-4">
+  <div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow"><canvas id="trendTraffic"></canvas></div>
+  <div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow"><canvas id="trendLatency"></canvas></div>
+</div>
+<script>
+Promise.all([fetch('/api/metrics/traffic?range=1h').then(r=>r.json()), fetch('/api/metrics/latency?range=1h').then(r=>r.json())]).then(([traffic,lat])=>{
+ new Chart(document.getElementById('trendTraffic'), {type:'line', data:{labels:traffic.map(x=>x.ts.slice(11)), datasets:[{label:'bytes_in', data:traffic.map(x=>x.bytes_in)},{label:'bytes_out', data:traffic.map(x=>x.bytes_out)}]}})
+ new Chart(document.getElementById('trendLatency'), {type:'line', data:{labels:lat.map(x=>x.ts.slice(11)), datasets:[{label:'latency ms', data:lat.map(x=>x.latency_ms)}]}})
+})
+</script>
+{% endblock %}

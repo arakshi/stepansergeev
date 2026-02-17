@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Tests</h1>
+<div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow mb-4"><canvas id="successRate"></canvas></div>
+<div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow overflow-auto">
+<table class="w-full text-sm"><tr><th>Time</th><th>Status</th><th>Duration ms</th><th>Checks</th></tr>
+{% for run in runs %}<tr class="border-t align-top"><td>{{run.ts}}</td><td>{{run.status}}</td><td>{{run.duration_ms}}</td><td>{% for c in checks.get(run.id, []) %}<div>{{c.check_name}}: {{c.status}} ({{c.message}})</div>{% endfor %}</td></tr>{% endfor %}
+</table></div>
+<script>
+const runs = {{ runs_chart | tojson }};
+const byDay = {};
+runs.forEach(r=>{const d=r.ts.slice(0,10); byDay[d]=byDay[d]||{t:0,s:0}; byDay[d].t++; if(r.status==='passed') byDay[d].s++;});
+const labels = Object.keys(byDay).sort();
+new Chart(document.getElementById('successRate'), {type:'line', data:{labels, datasets:[{label:'success %', data:labels.map(d=>Math.round((byDay[d].s/byDay[d].t)*100))}]}})
+</script>
+{% endblock %}
