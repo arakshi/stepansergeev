@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulation Control Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex items-center justify-center p-6">
+  <div class="max-w-2xl w-full bg-white rounded-2xl shadow p-8">
+    <h1 class="text-2xl font-bold mb-3">Simulation Control Panel</h1>
+    <p class="mb-4">Предпросмотр статики активен. Для полноценного интерфейса запустите FastAPI приложение:</p>
+    <pre class="bg-slate-900 text-slate-100 rounded p-4 text-sm overflow-auto">python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload</pre>
+    <p class="mt-4 text-sm">После запуска откройте <a class="underline text-indigo-600" href="http://127.0.0.1:8000/dashboard">/dashboard</a>.</p>
+  </div>
+</body>
+</html>

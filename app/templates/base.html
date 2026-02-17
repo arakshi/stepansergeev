@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en" x-data="{ dark: localStorage.theme === 'dark', toast: '{{ request.query_params.get('"'"'flash'"'"','"'"''"'"') }}' }" x-init="$watch('dark', v => {document.documentElement.classList.toggle('dark', v); localStorage.theme = v ? 'dark':'light'}); document.documentElement.classList.toggle('dark', dark)">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>{{ title or 'Control Panel' }}</title>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen">
+<div class="flex min-h-screen">
+  <aside class="w-20 md:w-64 bg-white dark:bg-slate-800 shadow-lg p-4">
+    <div class="font-bold text-lg hidden md:block mb-4">Demo Panel</div>
+    <nav class="space-y-2 text-sm">
+      <a class="block p-2 rounded hover:bg-slate-200 dark:hover:bg-slate-700" href="/dashboard">Dashboard</a>
+      <a class="block p-2 rounded hover:bg-slate-200 dark:hover:bg-slate-700" href="/agents">Agents</a>
+      <a class="block p-2 rounded hover:bg-slate-200 dark:hover:bg-slate-700" href="/profiles">Profiles</a>
+      <a class="block p-2 rounded hover:bg-slate-200 dark:hover:bg-slate-700" href="/audit">Audit</a>
+      <a class="block p-2 rounded hover:bg-slate-200 dark:hover:bg-slate-700" href="/analytics">Analytics</a>
+      <a class="block p-2 rounded hover:bg-slate-200 dark:hover:bg-slate-700" href="/tests">Tests</a>
+    </nav>
+  </aside>
+  <main class="flex-1 p-4 md:p-6">
+    <header class="flex items-center justify-between mb-4 bg-white dark:bg-slate-800 rounded-xl p-3 shadow">
+      <div class="text-sm">Logged as: <span class="font-semibold">{{ user.username }}</span> ({{ user.role }})</div>
+      <div class="flex gap-2 items-center">
+        <a href="/switch-user?name=admin" class="text-xs underline">admin</a>
+        <a href="/switch-user?name=operator" class="text-xs underline">operator</a>
+        <a href="/switch-user?name=viewer" class="text-xs underline">viewer</a>
+        <button @click="dark=!dark" class="px-2 py-1 rounded bg-slate-200 dark:bg-slate-700 text-xs">Theme</button>
+      </div>
+    </header>
+    {% block content %}{% endblock %}
+  </main>
+</div>
+<div x-show="toast" x-transition class="fixed bottom-4 right-4 bg-emerald-600 text-white px-4 py-2 rounded shadow" x-text="toast"></div>
+</body>
+</html>

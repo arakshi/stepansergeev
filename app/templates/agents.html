@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Agents</h1>
+<form class="grid md:grid-cols-4 gap-2 mb-3">
+  <input name="search" placeholder="Search name" class="p-2 rounded border" value="{{request.query_params.get('search','')}}"/>
+  <select name="status" class="p-2 rounded border"><option value="all">all</option><option value="online">online</option><option value="offline">offline</option></select>
+  <select name="sort" class="p-2 rounded border"><option value="desc">last_seen desc</option><option value="asc">last_seen asc</option></select>
+  <button class="bg-blue-600 text-white rounded px-3">Apply</button>
+</form>
+<div class="grid lg:grid-cols-3 gap-4">
+<div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl p-4 shadow overflow-auto">
+<table class="w-full text-sm"><thead><tr><th>Name</th><th>Status</th><th>Last seen</th><th>Actions</th></tr></thead><tbody>
+{% for a in agents %}
+<tr class="border-t"><td><a class="underline" href="/agents?agent_id={{a.id}}">{{a.name}}</a></td><td>{{a.status}}</td><td>{{a.last_seen}}</td><td>
+{% if user.role != 'viewer' %}
+<form method="post" action="/agents/{{a.id}}/apply" class="inline" x-data="{open:false}">
+<select name="profile_id" class="border rounded text-xs">{% for p in profiles %}<option value="{{p.id}}">{{p.name}}</option>{% endfor %}</select>
+<button type="button" @click="open=true" class="px-2 py-1 bg-emerald-600 text-white rounded">Apply</button>
+<div x-show="open" class="fixed inset-0 bg-black/50 flex items-center justify-center"><div class="bg-white p-4 rounded"><p>Apply profile?</p><button class="bg-emerald-600 text-white px-3 py-1 rounded" type="submit">Confirm</button><button type="button" @click="open=false" class="ml-2">Cancel</button></div></div>
+</form>
+<form method="post" action="/agents/{{a.id}}/stop" class="inline" x-data="{open:false}">
+<button type="button" @click="open=true" class="px-2 py-1 bg-rose-600 text-white rounded">Stop</button>
+<div x-show="open" class="fixed inset-0 bg-black/50 flex items-center justify-center"><div class="bg-white p-4 rounded"><p>Stop profile?</p><button class="bg-rose-600 text-white px-3 py-1 rounded" type="submit">Confirm</button><button type="button" @click="open=false" class="ml-2">Cancel</button></div></div>
+</form>
+{% endif %}
+</td></tr>
+{% endfor %}
+</tbody></table></div>
+<div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow"><h3 class="font-semibold mb-2">Last 10 telemetry</h3>
+<ul class="text-xs space-y-1">{% for t in telemetry %}<li>{{t.ts}} | in={{t.bytes_in}} out={{t.bytes_out}} lat={{t.latency_ms}} err={{t.errors}}</li>{% endfor %}</ul></div>
+</div>
+{% endblock %}

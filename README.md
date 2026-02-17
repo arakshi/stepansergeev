@@ -1,64 +1,100 @@
-# Contentful Gatsby Starter Blog
+# Demo Simulation Control Panel (FastAPI + SQLModel)
 
-Create a [Gatsby](http://gatsbyjs.com/) blog powered by [Contentful](https://www.contentful.com). This is a simplified version of the [Gatsby Contentful Starter](https://github.com/contentful-userland/gatsby-contentful-starter) which is maintained by our Community.
+Учебный DEMO-макет панели управления с **полностью симуляционными** метриками и событиями.
 
-![The index page of the starter blog](https://rawgit.com/contentful-userland/gatsby-contentful-starter/master/screenshot.jpg "The index page of the starter blog")
+> В проекте нет реальных VPN/туннелей/обходов/сетевых инъекций. Все потоки и действия — синтетические.
 
-Static sites are scalable, secure and have very little required maintenance. They come with a drawback though. Not everybody feels good editing files, building a project and uploading it somewhere. This is where Contentful comes into play.
+## Быстрый старт (CLI)
 
-With Contentful and Gatsby you can connect your favorite static site generator with an API that provides an easy to use interface for people writing content and automate the publishing using services like [Travis CI](https://travis-ci.org/) or [Netlify](https://www.netlify.com/).
-
-## Features
-
-- Simple content model and structure. Easy to adjust to your needs.
-- Use the [synchronization feature](https://www.contentful.com/developers/docs/references/content-delivery-api/#/reference/synchronization) of our [Delivery API](https://www.contentful.com/developers/docs/references/content-delivery-api/).
-- Responsive/adaptive images via [gatsby-image](https://www.gatsbyjs.org/packages/gatsby-image/) and our [Images API](https://www.contentful.com/developers/docs/references/content-delivery-api/#/reference/synchronization/initial-synchronization-of-entries-of-a-specific-content-type).
-
-## Getting started
-
-See our [official Contentful getting started guide](https://www.contentful.com/developers/docs/tutorials/general/get-started/).
-
-### Get the source code and install dependencies.
-
-```
-$ git clone https://github.com/contentful/starter-gatsby-blog.git
-$ npm install
+### Windows (PowerShell)
+```powershell
+py -3.10 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python run.py
 ```
 
-Or use the [Gatsby CLI](https://www.npmjs.com/package/gatsby-cli).
-
+### macOS/Linux
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python run.py
 ```
-$ gatsby new contentful-starter-blog https://github.com/contentful/starter-gatsby-blog/
+
+Откройте: `http://127.0.0.1:8000/dashboard`
+
+---
+
+## Запуск в PyCharm (чтобы не было ваших ошибок)
+
+Проблема из вашего лога: при запуске `app/main.py` IDE подхватывает **чужой пакет `app`** из `site-packages`, а не локальную папку проекта.
+
+Сделайте так:
+
+1. **Откройте проект целиком** (корень репозитория), а не только папку `app`.
+2. **Выберите интерпретатор проекта**:
+   - `File → Settings → Project: ... → Python Interpreter`
+   - создайте/выберите `.venv` внутри проекта.
+3. Установите зависимости:
+   - в терминале PyCharm: `pip install -r requirements.txt`
+4. Создайте Run Configuration:
+   - `Run → Edit Configurations...`
+   - `+` → **Python**
+   - `Script path`: `<проект>/run.py`
+   - `Working directory`: `<проект>`
+   - `Python interpreter`: ваш `.venv`
+5. Нажмите Run.
+
+Альтернатива:
+- можно запускать как модуль: `python -m app`.
+
+> В проект добавлен безопасный launcher `run.py` и `app/__main__.py`, чтобы запуск в PyCharm/Windows был стабильным.
+
+---
+
+## Если в preview "Not Found"
+В репозитории есть legacy static-preview конфиг (`static.json`).
+Чтобы preview не был пустым, добавлена fallback-страница `public/index.html` с инструкцией запуска FastAPI.
+Для полноценной работы нужен запуск backend-команды выше.
+
+Также добавлен `Procfile`:
+```Procfile
+web: uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
 ```
 
-### Set up of the needed content model and create a configuration file
+## Стек
+- FastAPI
+- SQLModel + SQLite
+- Jinja2 templates
+- HTMX + Alpine.js (CDN)
+- TailwindCSS (CDN)
+- Chart.js (CDN)
 
-This project comes with a Contentful setup command `npm run setup`.
+## Что есть по страницам
+- `/dashboard` — KPI и мини-графики трендов.
+- `/agents` — таблица агентов, поиск/фильтры/сортировка, apply/stop (с модалками), последние telemetry по агенту.
+- `/profiles` — поиск и сортировка профилей.
+- `/audit` — фильтры по пользователю/действию/диапазону дат.
+- `/analytics` — KPI, графики, объединённая лента последних событий, экспорт telemetry CSV.
+- `/tests` — список прогонов, длительность, список проверок, график процента успешных прогонов.
 
-This command will ask you for a space ID, and access tokens for the Contentful Management and Delivery API and then import the needed content model into the space you define and write a config file (`./.contentful.json`).
+## API метрик
+- `GET /api/metrics/kpi?range=1h|24h|7d`
+- `GET /api/metrics/traffic?range=1h|24h`
+- `GET /api/metrics/latency?range=1h|24h`
+- `GET /api/metrics/actions?range=24h`
+- `GET /api/metrics/profile_distribution?range=7d`
+- `GET /api/metrics/top_errors?range=24h`
+- `GET /api/telemetry/export.csv?range=24h`
+- `GET /healthz`
 
-`npm run setup` automates that for you but if you want to do it yourself rename `.contentful.json.sample` to `.contentful.json` and add your configuration in this file.
+## Данные
+При первом запуске сидируются:
+- 3 пользователя: admin/operator/viewer
+- 7 агентов
+- 5 профилей
+- telemetry за последний час
+- тестовые прогоны за ~15 дней
 
-## Crucial Commands
-
-### `npm run dev`
-
-Run the project locally with live reload in development mode.
-
-### `npm run build`
-
-Run a production build into `./public`. The result is ready to be put on any static hosting you prefer.
-
-### `npm run serve`
-
-Spin up a production-ready server with your blog. Don't forget to build your page beforehand.
-
-## Deployment
-
-See the [official Contentful getting started guide](https://www.contentful.com/developers/docs/tutorials/general/get-started/).
-
-## Contribution
-
-Feel free to open pull requests to fix bugs. If you want to add features, please have a look at the [original version](https://github.com/contentful-userland/gatsby-contentful-starter). It is always open to contributions and pull requests.
-
-You can learn more about how Contentful userland is organized by visiting [our about repository](https://github.com/contentful-userland/about).
+Также запускается фоновый генератор telemetry для online-агентов (каждые ~7 секунд).
